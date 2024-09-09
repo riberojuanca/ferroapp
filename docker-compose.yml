@@ -1,0 +1,59 @@
+version: "3.7"
+
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    networks:
+      - red
+    restart: always
+    environment:
+      DEFAULT_HOST: ${domain}
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./web/config/nginx.conf:/etc/nginx/nginx.conf:ro
+      # Elimina o comenta esta línea si no necesitas mime.types
+      # - ./web/config/mime.types:/etc/nginx/mime.types:ro
+      - ./web/config/certs:/etc/nginx/certs:ro
+      - ./web/config/vhostd:/etc/nginx/vhost.d
+      - ./web/config/html:/usr/share/nginx/html
+    labels:
+      - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
+
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: nginx-proxy-companion
+    networks:
+      - red
+    restart: always
+    environment:
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+    volumes:
+      - ./web/config/certs:/etc/nginx/certs:rw
+      - ./web/config/vhostd:/etc/nginx/vhost.d
+      - ./web/config/html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  livestream:
+    image: jasonrivers/nginx-rtmp
+    container_name: livestream
+    restart: always
+    networks:
+      - red
+    ports:
+      - "1935:1935"
+      - "8081:8080" # Cambiado para evitar conflictos
+    volumes:
+      - ./web/public:/opt/nginx/html:ro
+      - ./web/config:/opt/nginx/conf/ # Asegúrate de que esta ruta es correcta
+    environment:
+      VIRTUAL_HOST: ${domain}
+      LETSENCRYPT_HOST: ${domain}
+      LETSENCRYPT_EMAIL: ${email}
+
+networks:
+  red:
+    driver: "bridge"

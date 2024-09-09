@@ -1,0 +1,18 @@
+text/html                         html htm
+text/css                          css
+text/xml                           xml
+application/xml                    xml
+application/xhtml+xml              xhtml xht
+application/rss+xml                rss
+application/atom+xml               atom
+application/json                   json
+application/javascript             js
+application/x-javascript           js
+application/x-shockwave-flash      swf
+image/jpeg                         jpeg jpg
+image/png                          png
+image/gif                          gif
+image/webp                         webp
+image/svg+xml                      svg svgz
+text/plain                         txt
+text/plain                         text
